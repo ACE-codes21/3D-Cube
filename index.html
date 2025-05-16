@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>3D Cube Demo</title>
+  <title>3D Cube Mobile</title>
   <style>
     body { margin: 0; overflow: hidden; }
     canvas { display: block; }
@@ -19,42 +19,49 @@
     renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(renderer.domElement);
 
-    // Cube
     const geometry = new THREE.BoxGeometry();
-    const material = new THREE.MeshNormalMaterial(); // auto-colored
+    const material = new THREE.MeshNormalMaterial();
     const cube = new THREE.Mesh(geometry, material);
     scene.add(cube);
-
-    // Camera position
     camera.position.z = 3;
 
-    // Resize handling
+    // Handle resizing
     window.addEventListener('resize', () => {
       camera.aspect = window.innerWidth/window.innerHeight;
       camera.updateProjectionMatrix();
       renderer.setSize(window.innerWidth, window.innerHeight);
     });
 
-    // Mouse interaction
-    let mouseX = 0, mouseY = 0;
-    document.addEventListener('mousemove', event => {
-      mouseX = (event.clientX / window.innerWidth) * 2 - 1;
-      mouseY = -(event.clientY / window.innerHeight) * 2 + 1;
+    // Input tracking
+    let pointerX = 0, pointerY = 0;
+
+    // Mouse move
+    document.addEventListener('mousemove', (e) => {
+      pointerX = (e.clientX / window.innerWidth) * 2 - 1;
+      pointerY = -(e.clientY / window.innerHeight) * 2 + 1;
     });
 
+    // Touch move (mobile)
+    document.addEventListener('touchmove', (e) => {
+      if (e.touches.length > 0) {
+        pointerX = (e.touches[0].clientX / window.innerWidth) * 2 - 1;
+        pointerY = -(e.touches[0].clientY / window.innerHeight) * 2 + 1;
+      }
+    }, { passive: true });
+
     // Animate
-    const animate = function () {
+    function animate() {
       requestAnimationFrame(animate);
       cube.rotation.x += 0.01;
       cube.rotation.y += 0.01;
 
-      // Slight camera movement
-      camera.position.x = mouseX * 0.5;
-      camera.position.y = mouseY * 0.5;
+      // Camera reacts to pointer
+      camera.position.x = pointerX * 0.5;
+      camera.position.y = pointerY * 0.5;
       camera.lookAt(scene.position);
 
       renderer.render(scene, camera);
-    };
+    }
     animate();
   </script>
 </body>
