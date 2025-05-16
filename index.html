@@ -3,83 +3,94 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>3D Interactive Torus</title>
+  <title>3D Torus Scene</title>
   <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
-      margin: 0;
+      background: linear-gradient(to bottom, #0f2027, #203a43, #2c5364);
       overflow: hidden;
-      background: linear-gradient(120deg, #1e1e40, #000428);
-      font-family: 'Segoe UI', sans-serif;
+      font-family: 'Poppins', sans-serif;
+      color: white;
     }
     canvas { display: block; }
+
+    /* UI Panel */
+    .ui-panel {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      padding: 15px 20px;
+      background: rgba(0, 0, 0, 0.4);
+      border-radius: 12px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 0 12px rgba(0,0,0,0.6);
+    }
+
+    .ui-panel h1 {
+      font-size: 1.2rem;
+      margin-bottom: 5px;
+    }
+
+    .ui-panel p {
+      font-size: 0.9rem;
+      opacity: 0.8;
+    }
   </style>
 </head>
 <body>
+  <div class="ui-panel">
+    <h1>3D Torus Demo</h1>
+    <p>Interactive 3D object using Three.js</p>
+  </div>
+
   <script src="https://cdn.jsdelivr.net/npm/three@0.157.0/build/three.min.js"></script>
   <script>
+    // Scene Setup
     const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
-    const renderer = new THREE.WebGLRenderer({antialias: true});
+    const camera = new THREE.PerspectiveCamera(
+      75,
+      window.innerWidth / window.innerHeight,
+      0.1,
+      1000
+    );
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(window.devicePixelRatio);
     document.body.appendChild(renderer.domElement);
 
-    // Geometry: Bright, vibrant torus
-    const geometry = new THREE.TorusGeometry(1, 0.4, 16, 100);
+    // Glowing Torus
+    const geometry = new THREE.TorusGeometry(1, 0.35, 30, 200);
     const material = new THREE.MeshStandardMaterial({
-      color: 0xff6f61,
+      color: 0x00ffe7,
       metalness: 0.9,
-      roughness: 0.1,
-      emissive: 0x441111,
-      emissiveIntensity: 0.3
+      roughness: 0.15,
+      emissive: 0x003344,
+      emissiveIntensity: 0.5
     });
     const torus = new THREE.Mesh(geometry, material);
     scene.add(torus);
 
-    // Lighting setup
-    const pointLight = new THREE.PointLight(0xffffff, 2);
-    pointLight.position.set(4, 4, 4);
+    // Lighting
+    const pointLight = new THREE.PointLight(0xffffff, 1.8);
+    pointLight.position.set(3, 3, 3);
     scene.add(pointLight);
 
-    const ambientLight = new THREE.AmbientLight(0x333333, 2);
-    scene.add(ambientLight);
+    const rimLight = new THREE.PointLight(0x00ffe7, 1);
+    rimLight.position.set(-3, -3, 5);
+    scene.add(rimLight);
 
-    // Camera position
-    camera.position.z = 3;
+    const ambient = new THREE.AmbientLight(0x111111);
+    scene.add(ambient);
 
-    // Responsive resizing
-    window.addEventListener('resize', () => {
+    // Camera
+    camera.position.z = 4;
+
+    // Resize
+    window.addEventListener("resize", () => {
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
       renderer.setSize(window.innerWidth, window.innerHeight);
     });
 
-    // Interaction (mouse + touch)
+    // Interaction
     let pointerX = 0, pointerY = 0;
-    document.addEventListener('mousemove', e => {
-      pointerX = (e.clientX / window.innerWidth) * 2 - 1;
-      pointerY = -(e.clientY / window.innerHeight) * 2 + 1;
-    });
-    document.addEventListener('touchmove', e => {
-      if (e.touches.length > 0) {
-        pointerX = (e.touches[0].clientX / window.innerWidth) * 2 - 1;
-        pointerY = -(e.touches[0].clientY / window.innerHeight) * 2 + 1;
-      }
-    }, { passive: true });
-
-    // Animation
-    function animate() {
-      requestAnimationFrame(animate);
-      torus.rotation.x += 0.015;
-      torus.rotation.y += 0.03;
-
-      camera.position.x += (pointerX * 0.6 - camera.position.x) * 0.05;
-      camera.position.y += (pointerY * 0.6 - camera.position.y) * 0.05;
-      camera.lookAt(scene.position);
-
-      renderer.render(scene, camera);
-    }
-    animate();
-  </script>
-</body>
-</html>
