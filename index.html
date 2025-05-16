@@ -3,65 +3,84 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>3D Cube Mobile</title>
+  <title>3D Modern Torus</title>
   <style>
-    body { margin: 0; overflow: hidden; }
+    body {
+      margin: 0;
+      overflow: hidden;
+      background: radial-gradient(circle at center, #111 0%, #000 100%);
+      font-family: 'Segoe UI', sans-serif;
+    }
     canvas { display: block; }
   </style>
 </head>
 <body>
   <script src="https://cdn.jsdelivr.net/npm/three@0.157.0/build/three.min.js"></script>
   <script>
-    // Scene setup
+    // Setup
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
     const renderer = new THREE.WebGLRenderer({antialias: true});
     renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(window.devicePixelRatio);
     document.body.appendChild(renderer.domElement);
 
-    const geometry = new THREE.BoxGeometry();
-    const material = new THREE.MeshNormalMaterial();
-    const cube = new THREE.Mesh(geometry, material);
-    scene.add(cube);
+    // Torus geometry (glowing donut)
+    const geometry = new THREE.TorusGeometry(1, 0.4, 16, 100);
+    const material = new THREE.MeshStandardMaterial({
+      color: 0x66ccff,
+      metalness: 0.7,
+      roughness: 0.2
+    });
+    const torus = new THREE.Mesh(geometry, material);
+    scene.add(torus);
+
+    // Lighting
+    const pointLight = new THREE.PointLight(0xffffff, 1.5);
+    pointLight.position.set(5, 5, 5);
+    scene.add(pointLight);
+
+    const ambientLight = new THREE.AmbientLight(0x404040, 2);
+    scene.add(ambientLight);
+
     camera.position.z = 3;
 
-    // Handle resizing
+    // Resize responsiveness
     window.addEventListener('resize', () => {
-      camera.aspect = window.innerWidth/window.innerHeight;
+      camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
       renderer.setSize(window.innerWidth, window.innerHeight);
     });
 
-    // Input tracking
+    // Interaction
     let pointerX = 0, pointerY = 0;
 
-    // Mouse move
-    document.addEventListener('mousemove', (e) => {
+    document.addEventListener('mousemove', e => {
       pointerX = (e.clientX / window.innerWidth) * 2 - 1;
       pointerY = -(e.clientY / window.innerHeight) * 2 + 1;
     });
 
-    // Touch move (mobile)
-    document.addEventListener('touchmove', (e) => {
+    document.addEventListener('touchmove', e => {
       if (e.touches.length > 0) {
         pointerX = (e.touches[0].clientX / window.innerWidth) * 2 - 1;
         pointerY = -(e.touches[0].clientY / window.innerHeight) * 2 + 1;
       }
     }, { passive: true });
 
-    // Animate
+    // Animation loop
     function animate() {
       requestAnimationFrame(animate);
-      cube.rotation.x += 0.01;
-      cube.rotation.y += 0.01;
 
-      // Camera reacts to pointer
-      camera.position.x = pointerX * 0.5;
-      camera.position.y = pointerY * 0.5;
+      torus.rotation.x += 0.01;
+      torus.rotation.y += 0.02;
+
+      camera.position.x = pointerX * 0.8;
+      camera.position.y = pointerY * 0.8;
       camera.lookAt(scene.position);
 
       renderer.render(scene, camera);
     }
+
     animate();
   </script>
 </body>
